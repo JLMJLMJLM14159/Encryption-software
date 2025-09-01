@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.IO.Pipelines;
 
 namespace Encryption_software
 {
@@ -28,6 +29,7 @@ namespace Encryption_software
                 return 0;
             }
 
+            byte[] bytesToBeEncrypted = File.ReadAllBytes(fileToBeEncryptedPath);
             FileInfo fileInfo = new(fileToBeEncryptedPath);
             long howManyBytes = fileInfo.Length;
             long howManyBits = fileInfo.Length * 8;
@@ -49,33 +51,78 @@ namespace Encryption_software
                     if (key[bitIndex]) { b |= (byte)(1 << bit); }
                 }
                 int totalRepetitions = b;
+                if (totalRepetitions < 8) { totalRepetitions *= 8; }
                 int currentRepetitions = 0;
 
-                long currentBitWatching = howManyBits / 2;
-                
                 List<int> sizeOfJump = [1, 1];
                 for (long j = 0; j < totalRepetitions - 2; j++)
                 { sizeOfJump.Add(sizeOfJump[^1] + sizeOfJump[^2]); }
 
                 BitArray selectedBits = new(totalRepetitions);
 
+                long currentBitWatching = howManyBits / 2;
+
+                List<byte> encryptedBytes = [];
+
                 while (currentRepetitions < totalRepetitions)
                 {
                     selectedBits[currentRepetitions] = key[currentBitWatching];
 
-                    if (key[currentBitWatching] == true)
-                    { currentBitWatching += sizeOfJump[^currentRepetitions]; }
-                    if (key[currentBitWatching] == false)
-                    { currentBitWatching -= sizeOfJump[^currentRepetitions]; }
+                    if (key[currentBitWatching])
+                    {
+                        long newBitWatching = currentBitWatching + sizeOfJump[^(currentRepetitions + 1)];
 
-                    //EDIT BYTES IN TO BE ENCRYPTED FILE
+                        if (newBitWatching > howManyBits)
+                        { newBitWatching = currentBitWatching + sizeOfJump[^currentRepetitions] - howManyBits; }
+                    }
+
+                    if (!key[currentBitWatching])
+                    {
+                        long newBitWatching = currentBitWatching - sizeOfJump[^(currentRepetitions + 1)];
+
+                        if (newBitWatching < howManyBits)
+                        { newBitWatching = currentBitWatching + sizeOfJump[^currentRepetitions] + howManyBits; }
+                    }
 
                     currentRepetitions++;
                 }
+
+                int dividedNumber = (int)Math.Round(selectedBits.Length / 8.0);
+                BitArray bitsToConvert = new(8);
+                for (int j = 0; j < 8; j++)
+                {
+                    try
+                    { bitsToConvert[j] = selectedBits[(dividedNumber * (j + 1)) - 1]; }
+                    catch { bitsToConvert[j] = selectedBits[^1]; }
+                }
+
+                byte numberToShiftWith = ((Func<BitArray, byte>)(bitArray =>
+                {
+                    byte[] idkAnymore = new byte[1];
+                    bitArray.CopyTo(idkAnymore, 0);
+                    return idkAnymore[0];
+                }))(bitsToConvert);
+
+                encryptedBytes.Add(CaesarCipherModulo256(bytesToBeEncrypted[i], numberToShiftWith, true));
+
+                currentRepetitions++;
             }
 
             return 0;
         }
+
+        public static byte CaesarCipherModulo256(byte value, byte shift, bool isUp)
+        {
+            int result = 0;
+
+            if (isUp) { result = (value + shift) % 256; }
+            else { result = (value - shift) % 256; }
+
+            if (result < 0) { result += 256; }
+
+            return (byte)result;
+        }
+
     }
 
     public class LongBitArray
