@@ -48,16 +48,29 @@ namespace Encryption_software
 
                     if (key[bitIndex]) { b |= (byte)(1 << bit); }
                 }
-                int repetitionsLeft = b;
+                int totalRepetitions = b;
+                int currentRepetitions = 0;
 
                 long currentBitWatching = howManyBits / 2;
                 
-                List<int> sizeOfJump = [1, 1, 2, 3];
+                List<int> sizeOfJump = [1, 1];
+                for (long j = 0; j < totalRepetitions - 2; j++)
+                { sizeOfJump.Add(sizeOfJump[^1] + sizeOfJump[^2]); }
 
-                while (repetitionsLeft > 0)
+                BitArray selectedBits = new(totalRepetitions);
+
+                while (currentRepetitions < totalRepetitions)
                 {
+                    selectedBits[currentRepetitions] = key[currentBitWatching];
+
                     if (key[currentBitWatching] == true)
-                    { }
+                    { currentBitWatching += sizeOfJump[^currentRepetitions]; }
+                    if (key[currentBitWatching] == false)
+                    { currentBitWatching -= sizeOfJump[^currentRepetitions]; }
+
+                    //EDIT BYTES IN TO BE ENCRYPTED FILE
+
+                    currentRepetitions++;
                 }
             }
 
