@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.IO.Pipelines;
 
 namespace Encryption_software
 {
@@ -29,16 +28,23 @@ namespace Encryption_software
                 return 0;
             }
 
+            Console.WriteLine("Choose a name for the encrypted file:");
+            string? file_name = Console.ReadLine();
+
             byte[] bytesToBeEncrypted = File.ReadAllBytes(fileToBeEncryptedPath);
             FileInfo fileInfo = new(fileToBeEncryptedPath);
             long howManyBytes = fileInfo.Length;
             long howManyBits = fileInfo.Length * 8;
 
             List<bool> randomBits = [];
+            Random random = new();
             for (int i = 1; i <= howManyBits; i++)
-            { randomBits.Add(new Random().Next(0, 2) == 1); }
+            { randomBits.Add(random.Next(0, 2) == 1); }
             LongBitArray key = new([.. randomBits]);
-            File.WriteAllBytes($"{targetDirectoryPath}/key", key.ToByteArray());
+            File.WriteAllBytes($"{targetDirectoryPath}/{file_name} key", key.ToByteArray());
+
+            long currentBitWatching = key.Length / 2;
+            List<byte> encryptedBytes = [];
 
             for (long i = 0; i < howManyBytes; i++)
             {
@@ -60,28 +66,23 @@ namespace Encryption_software
 
                 BitArray selectedBits = new(totalRepetitions);
 
-                long currentBitWatching = howManyBits / 2;
-
-                List<byte> encryptedBytes = [];
-
                 while (currentRepetitions < totalRepetitions)
                 {
                     selectedBits[currentRepetitions] = key[currentBitWatching];
 
                     if (key[currentBitWatching])
                     {
-                        long newBitWatching = currentBitWatching + sizeOfJump[^(currentRepetitions + 1)];
-
-                        if (newBitWatching > howManyBits)
-                        { newBitWatching = currentBitWatching + sizeOfJump[^currentRepetitions] - howManyBits; }
+                        currentBitWatching = Mod(
+                            currentBitWatching + sizeOfJump[^(currentRepetitions + 1)],
+                            key.Length
+                        );
                     }
-
-                    if (!key[currentBitWatching])
+                    else
                     {
-                        long newBitWatching = currentBitWatching - sizeOfJump[^(currentRepetitions + 1)];
-
-                        if (newBitWatching < howManyBits)
-                        { newBitWatching = currentBitWatching + sizeOfJump[^currentRepetitions] + howManyBits; }
+                        currentBitWatching = Mod(
+                            currentBitWatching - sizeOfJump[^(currentRepetitions + 1)],
+                            key.Length
+                        );
                     }
 
                     currentRepetitions++;
@@ -103,24 +104,27 @@ namespace Encryption_software
                     return idkAnymore[0];
                 }))(bitsToConvert);
 
-                encryptedBytes.Add(CaesarCipherModulo256(bytesToBeEncrypted[i], numberToShiftWith, true));
-
-                currentRepetitions++;
+                encryptedBytes.Add(CaesarCipherMod256(bytesToBeEncrypted[i], numberToShiftWith, true));
             }
+
+            File.WriteAllBytes(Path.Combine(targetDirectoryPath, "encrypted_file"), encryptedBytes.ToArray());
 
             return 0;
         }
 
-        public static byte CaesarCipherModulo256(byte value, byte shift, bool isUp)
+        private static long Mod(long value, long modulus)
         {
-            int result = 0;
+            return ((value % modulus) + modulus) % modulus;
+        }
 
-            if (isUp) { result = (value + shift) % 256; }
-            else { result = (value - shift) % 256; }
 
-            if (result < 0) { result += 256; }
-
+        public static byte CaesarCipherMod256(byte value, byte shift, bool isUp)
+        {
+            int result = (int)value;
+            result = isUp ? (result + shift) : (result - shift);
+            result = (result + 256) % 256;
             return (byte)result;
+
         }
 
     }
