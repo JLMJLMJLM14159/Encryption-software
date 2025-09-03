@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Reflection;
 
 namespace Encryption_software
 {
@@ -6,30 +7,25 @@ namespace Encryption_software
     {
         public static int Main(string[] args)
         {
-            if (args.Length < 2)
+            if (args.Length < 1)
             {
                 Console.WriteLine("yap yap yap main menu thingy idk");
-                if (args.Length == 1)
-                { Console.WriteLine("\nYou only gave one argument. You need to give the path to the file to be encrypted and the target directory path."); }
                 return 0;
             }
 
             string fileToBeEncryptedPath = args[0];
-            string targetDirectoryPath = args[1];
 
             if (!File.Exists(fileToBeEncryptedPath))
             {
-                Console.WriteLine("The path to the file to be encrypted does not exist.");
-                return 0;
-            }
-            if (!Directory.Exists(targetDirectoryPath))
-            {
-                Console.WriteLine("The target directory path does not exist.");
+                Console.WriteLine("The target file does not exist.");
                 return 0;
             }
 
-            Console.WriteLine("Choose a name for the encrypted file:");
-            string? file_name = Console.ReadLine();
+            Directory.CreateDirectory($"{AppContext.BaseDirectory}/KEYS - USE TO DECRYPT FILES");
+            Directory.CreateDirectory($"{AppContext.BaseDirectory}/ENCRYPTED FILES - DECRYPT WITH KEY");
+
+            string fileName = Path.GetFileNameWithoutExtension(fileToBeEncryptedPath);
+            string? fileExtension = Path.GetExtension(fileToBeEncryptedPath);
 
             byte[] bytesToBeEncrypted = File.ReadAllBytes(fileToBeEncryptedPath);
             FileInfo fileInfo = new(fileToBeEncryptedPath);
@@ -41,7 +37,7 @@ namespace Encryption_software
             for (int i = 1; i <= howManyBits; i++)
             { randomBits.Add(random.Next(0, 2) == 1); }
             LongBitArray key = new([.. randomBits]);
-            File.WriteAllBytes($"{targetDirectoryPath}/{file_name} key", key.ToByteArray());
+            File.WriteAllBytes($"{AppContext.BaseDirectory}/KEYS - USE TO DECRYPT FILES/{fileName} (key)", key.ToByteArray());
 
             long currentBitWatching = key.Length / 2;
             List<byte> encryptedBytes = [];
@@ -107,7 +103,7 @@ namespace Encryption_software
                 encryptedBytes.Add(CaesarCipherMod256(bytesToBeEncrypted[i], numberToShiftWith, true));
             }
 
-            File.WriteAllBytes(Path.Combine(targetDirectoryPath, "encrypted_file"), encryptedBytes.ToArray());
+            File.WriteAllBytes($"{AppContext.BaseDirectory}/ENCRYPTED FILES - DECRYPT WITH KEY/{fileName} (encrypted){fileExtension}", [.. encryptedBytes]);
 
             return 0;
         }
