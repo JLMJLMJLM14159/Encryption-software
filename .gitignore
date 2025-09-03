@@ -1,2 +1,4 @@
-bin/
-obj/
+Encryption/bin/
+Decryption/bin/
+Encryption/obj/
+Decryption/obj/

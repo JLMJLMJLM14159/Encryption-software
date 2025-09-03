@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Reflection;
 
-namespace Encryption_software
+namespace Encryption
 {
     public static class Program
     {
@@ -17,7 +17,7 @@ namespace Encryption_software
 
             if (!File.Exists(fileToBeEncryptedPath))
             {
-                Console.WriteLine("The target file does not exist.");
+                Console.WriteLine("The specified file does not exist.");
                 return 0;
             }
 
