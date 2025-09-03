@@ -102,7 +102,7 @@ namespace Decryption
                 encryptedBytes.Add(CaesarCipherMod256(bytesToBeEncrypted[i], numberToShiftWith, true));
             }
 
-            File.WriteAllBytes($"{AppContext.BaseDirectory}/DECRYPTED FILES - LOOK HERE AFTER DECRYPTION/{fileName} (encrypted){fileExtension}", [.. encryptedBytes]);
+            File.WriteAllBytes($"{AppContext.BaseDirectory}/DECRYPTED FILES - LOOK HERE AFTER DECRYPTION/{fileName}{fileExtension}", [.. encryptedBytes]);
 
             return 0;
         }
