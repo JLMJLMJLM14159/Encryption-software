@@ -12,6 +12,7 @@ Just a simple encryption software. You need a key file to open the encrypted fil
 - THERE IS NO RECOVERY - if you encrypt a file and lose the key, say goodbye to whatever was in that file.
 - It might take a while if you have a MASSIVE file but it's worth it right ??
 
+
 Also
 
 for you gamers
