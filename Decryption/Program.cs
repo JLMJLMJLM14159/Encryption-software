@@ -39,7 +39,7 @@ namespace Decryption
             LongBitArray key = new(keyInBytes);
 
             long currentBitWatching = key.Length / 2;
-            List<byte> encryptedBytes = [];
+            List<byte> decryptedBytes = [];
 
             for (long i = 0; i < howManyBytes; i++)
             {
@@ -68,14 +68,14 @@ namespace Decryption
                     if (key[currentBitWatching])
                     {
                         currentBitWatching = Mod(
-                            currentBitWatching - sizeOfJump[^(currentRepetitions + 1)],
+                            currentBitWatching + sizeOfJump[^(currentRepetitions + 1)],
                             key.Length
                         );
                     }
                     else
                     {
                         currentBitWatching = Mod(
-                            currentBitWatching + sizeOfJump[^(currentRepetitions + 1)],
+                            currentBitWatching - sizeOfJump[^(currentRepetitions - 1)],
                             key.Length
                         );
                     }
@@ -99,10 +99,10 @@ namespace Decryption
                     return idkAnymore[0];
                 }))(bitsToConvert);
 
-                encryptedBytes.Add(CaesarCipherMod256(bytesToBeEncrypted[i], numberToShiftWith, true));
+                decryptedBytes.Add(CaesarCipherMod256(bytesToBeEncrypted[i], numberToShiftWith, false));
             }
 
-            File.WriteAllBytes($"{AppContext.BaseDirectory}/DECRYPTED FILES - LOOK HERE AFTER DECRYPTION/{fileName}{fileExtension}", [.. encryptedBytes]);
+            File.WriteAllBytes($"{AppContext.BaseDirectory}/DECRYPTED FILES - LOOK HERE AFTER DECRYPTION/{fileName} (decrypted){fileExtension}", [.. decryptedBytes]);
 
             return 0;
         }
@@ -115,7 +115,7 @@ namespace Decryption
 
         public static byte CaesarCipherMod256(byte value, byte shift, bool isUp)
         {
-            int result = (int)value;
+            int result = value;
             result = isUp ? (result + shift) : (result - shift);
             result = (result + 256) % 256;
             return (byte)result;
