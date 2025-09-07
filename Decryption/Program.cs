@@ -75,7 +75,7 @@ namespace Decryption
                     else
                     {
                         currentBitWatching = Mod(
-                            currentBitWatching - sizeOfJump[^(currentRepetitions - 1)],
+                            currentBitWatching - sizeOfJump[^(currentRepetitions + 1)],
                             key.Length
                         );
                     }
