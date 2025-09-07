@@ -13,6 +13,11 @@ Just a simple encryption software. You need a key file to open the encrypted fil
 - It might take a while if you have a MASSIVE file but it's worth it right ??
 
 Also
+
 for you gamers
+
 THE CAKE IS A LIE.
+
 (yes im way to addicted)
+
+bye ig
