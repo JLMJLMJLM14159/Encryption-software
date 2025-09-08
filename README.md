@@ -1,6 +1,6 @@
 # Encryption software
 
-[Releases](https://github.com/JLMJLMJLM14159/Encryption-software)
+[Releases](https://github.com/JLMJLMJLM14159/Encryption-software/releases)
 
 Just a simple encryption software. You need a key file to open the encrypted file, and that key file will be as big as the file you encrypt. Then you simply need to get both the key and the encrypted file and decrypt them.
 
